@@ -6,6 +6,13 @@
 from tkinter import Tk, BOTH
 from tkinter.ttk import Frame, Button, Style, Entry
 
+from WellBehavedPython.api import *
+from WellBehavedPython.TestSuite import *
+from WellBehavedPython.VerboseConsoleTestRunner import *
+
+from Model import *
+from ModelTests import *
+
 class Example(Frame):
 
     def __init__(self, parent):
@@ -48,5 +55,12 @@ def main():
     app = Example(root)
     root.mainloop()
 
+def unitTest():
+    suite = TestSuite()
+    suite.add(ModelTests.suite())
+    runner = VerboseConsoleTestRunner()
+    runner.run(suite)
+
 if __name__ == "__main__":
-    main()
+    unitTest()
+#    main()
