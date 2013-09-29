@@ -2,34 +2,39 @@ from tkinter import BOTH
 from tkinter.ttk import Frame, Button, Style, Entry
 
 
-class View(Frame):
+class View:
 
     def __init__(self, parent, model):
-        Frame.__init__(self, parent)
+        
         self.parent = parent
 
         # This line puts us into MVC:
         self.model = model
         self.model.registerObserver(self)
 
-        self._createWidgets()
+        self._createWidgets(parent)
 
-    def _createWidgets(self):
+    def assignController(self, controller):
+        self.controller = controller
+
+    def _createWidgets(self, parent):
+        self.top = Frame(parent)
+
         self.parent.title("Simple")
 
-        self.style = Style()
-        self.style.theme_use("default")
-        self.pack(fill=BOTH, expand=1)
+        self.top.style = Style()
+        self.top.style.theme_use("default")
+        self.top.pack(fill=BOTH, expand=1)
 
-        self.quitButton = Button(self, text=self.model.getTitle(),
-                                 command = self.quit)
+        self.quitButton = Button(self.top, text=self.model.getTitle(),
+                                 command = self.top.quit)
         self.quitButton.place(x=10, y=50)
         
-        self.updateButton = Button(self, text=self.model.getCurrentText(), 
+        self.updateButton = Button(self.top, text=self.model.getCurrentText(), 
                                    command = self.updateButton_clicked)
         self.updateButton.place(x=10,y=80)
 
-        self.updateText = Entry(self, text=self.model.getNextText())
+        self.updateText = Entry(self.top, text=self.model.getNextText())
         self.updateText.place(x=150, y=80)
 
         self.modelUpdated(self.model)
