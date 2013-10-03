@@ -1,4 +1,4 @@
-class Presenter:
+class BasePresenter:
 
     def __init__(self, model, view):
         self.model = model
@@ -6,10 +6,13 @@ class Presenter:
         self.view.assignPresenter(self)
         self.model.registerObserver(self)
         self.modelUpdated()
+
+class Presenter(BasePresenter):
+    
+    def __init__(self, model, view):
+        BasePresenter.__init__(self, model, view)
     
     def updateText(self):
-        # TODO : this should extract the text from the view
-        #        and provide it to the model for updating...
         self.model.transferText()
 
     def modelUpdated(self):

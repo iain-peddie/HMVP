@@ -55,5 +55,22 @@ class ModelTests(TestCase):
         # Then
         expect(self.modelUpdatedReceived).toBeTrue()
 
+    def test_model_creates_different_next_text_each_time(self):
+        # Where
+        model = Model()
+        
+        # When        
+        initialNextText = model.getNextText()
+        model.transferText()
+        firstNextText = model.getNextText()
+        model.transferText()
+        secondNextText = model.getNextText()
+
+        # Then
+        expect(initialNextText).toEqual("I go to the button")
+        expect(firstNextText).toEqual("3 items")
+        expect(secondNextText).toEqual("4 items")
+
+
     def modelUpdated(self):
         self.modelUpdatedReceived = True

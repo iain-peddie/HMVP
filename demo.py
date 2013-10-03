@@ -18,13 +18,18 @@ from View import *
 import sys
 
 def main():
-    root = Tk()
     model = Model()
-    root.geometry("400x300+300+300")
-    view = View(root)
-    presenter = Presenter(model, view)
 
-    root.mainloop()
+    applicationView = ApplicationView()
+    
+    
+    masterView = MasterView(applicationView.createWindow())
+    masterPresenter = Presenter(model, masterView)
+
+    slaveView = SlaveView(applicationView.createWindow())
+    slavePresenter = Presenter(model, slaveView)
+
+    applicationView.show()
 
 def unitTest():
     suite = TestSuite()
