@@ -55,5 +55,5 @@ class ModelTests(TestCase):
         # Then
         expect(self.modelUpdatedReceived).toBeTrue()
 
-    def modelUpdated(self, model):
+    def modelUpdated(self):
         self.modelUpdatedReceived = True

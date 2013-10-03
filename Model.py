@@ -23,6 +23,7 @@ class Model:
     def _fireModelUpdated(self):
         for observer in self._observers:
             try:
-                observer.modelUpdated(self)
+                observer.modelUpdated()
             except Exception as ex:
                 print("problem in model updated event")
+                print(ex)
