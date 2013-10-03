@@ -8,6 +8,9 @@ class BaseModel:
     def registerObserver(self, observer):
         self._observers.append(observer)
 
+    def unregisterObserver(self, observer):        
+        self._observers.remove(observer)
+
 class Model(BaseModel):
 
     def __init__(self):
@@ -28,6 +31,10 @@ class Model(BaseModel):
 
     def getNextText(self):
         return self._nextText
+
+    def setNextText(self, text):
+        self._nextText = text
+        self._fireModelUpdated()
 
     def transferText(self):
         self._currentText.append(self._nextText)

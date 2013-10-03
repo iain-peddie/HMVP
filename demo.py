@@ -20,20 +20,17 @@ from ComponentFactory import *
 import sys
 
 def main():
-    model = Model()
-
     factory = ComponentFactory()
     application = factory.createApplication()
-    masterPresenter = factory.createMasterComponent(application)
-    slavePresenter = factory.createSlaveComponent(application)
-
+    application.createMasterWindow()
+    application.createSlaveWindow()
 
     application.show()
 
 def unitTest():
     suite = TestSuite()
     suite.add(ModelTests.suite())
-    suite.add(PresenterTests.suite())
+    suite.add(MasterPresenterTests.suite())
     suite.add(ApplicationControllerTests.suite())
     runner = VerboseConsoleTestRunner()
     results = runner.run(suite)

@@ -64,8 +64,9 @@ class MasterView(BaseView):
                                    command = self.updateButton_clicked)
         self.updateButton.grid(row = 0, column = 0)
 
-        self.transfersList = Listbox(self.top)
-        self.transfersList.grid(row = 1, column = 0, sticky = "nsew", columnspan = 2)
+        self.createListenerButton = Button(self.top, text="Create Listener", 
+                                        command = self.createListenerButton_clicked)
+        self.createListenerButton.grid(row = 1, column = 0)
 
         self.updateText = Entry(self.top, text="")
         self.updateText.grid(row = 0, column = 1)
@@ -78,13 +79,13 @@ class MasterView(BaseView):
         self.updateText.delete(0, len(currentUpdate))
         self.updateText.insert(0, model.getNextText())
 
-        self.transfersList.delete(0, END)
-        for line in currentText:
-            self.transfersList.insert(END, line)
-
     def updateButton_clicked(self):
         # This line means we're not in MVC or MVP, but MV:
-        self.presenter.updateText()
+        currentUpdate = self.updateText.get()
+        self.presenter.updateText(currentUpdate)
+
+    def createListenerButton_clicked(self):
+        self.presenter.requestCreateListener()
 
 class SlaveView(BaseView):
     def __init__(self):

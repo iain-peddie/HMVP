@@ -8,7 +8,7 @@ class ModelTests(TestCase):
     def __init__(self, name):
         TestCase.__init__(self, name)
 
-    def setUp(self):
+    def before(self):
         self.modelUpdatedReceived = False
 
     def test_model_provides_title(self):
@@ -71,6 +71,17 @@ class ModelTests(TestCase):
         expect(firstNextText).toEqual("3 items")
         expect(secondNextText).toEqual("4 items")
 
+    def test_can_unregister_observer(self):
+        # Where
+        model = Model();
+        model.registerObserver(self)
+        model.unregisterObserver(self)
+
+        # When
+        model.transferText()
+
+        # Then
+        expect(self.modelUpdatedReceived).toBeFalse()
 
     def modelUpdated(self):
         self.modelUpdatedReceived = True

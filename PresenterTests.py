@@ -10,7 +10,7 @@ from ComponentFactory import MockComponentFactory
 import weakref
 
 
-class PresenterTests(TestCase):
+class MasterPresenterTests(TestCase):
     
     def __init__(self, name):
         TestCase.__init__(self, name)
@@ -18,7 +18,12 @@ class PresenterTests(TestCase):
     def before(self):
         self.model = Model()
         self.view = MockView()
-        self.presenter = Presenter(self.model, self.view)
+        self.presenter = MasterPresenter(self.model, self.view, self)
+        self.createSlaveWindowCalled = False
+
+        # this method makes the test class a mock application controller
+    def createSlaveWindow(self):
+        self.createSlaveWindowCalled = True
 
     def test_setup(self):
         # Where
@@ -26,10 +31,11 @@ class PresenterTests(TestCase):
         model = self.model
 
         # When
-        presenter.updateText()
+        presenter.updateText("asdf")
 
         # Then
-        expect(model.getCurrentText()).toEqual(["Click button to transfer text", "I go to the button"])
+        expect(model.getCurrentText()).toEqual(["Click button to transfer text", "asdf"])
+        expect(model.getNextText()).toEqual("3 items")
 
     def test_presenter_catches_model_updated_event_and_presents_to_view(self):
         # Where
@@ -41,6 +47,16 @@ class PresenterTests(TestCase):
 
         # Then
         expect(self.view.updated).toBeTrue()
+
+    def test_presnter_delegates_cascades_request_to_parent(self):
+        # Where
+        presenter = self.presenter
+
+        # When
+        presenter.requestCreateListener()
+
+        # Then
+        expect(self.createSlaveWindowCalled).toBeTrue()
 
 class ApplicationControllerTests(TestCase):
     def __init__(self, name):
@@ -56,7 +72,7 @@ class ApplicationControllerTests(TestCase):
         # Where
         controller = self.controller
         childView = MockView()
-        child = Presenter(self.model, childView)
+        child = MasterPresenter(self.model, childView, self)
 
         # When
         createdBefore = childView.widgetsCreated

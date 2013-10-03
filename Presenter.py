@@ -7,16 +7,26 @@ class BasePresenter:
         self.model.registerObserver(self)
         self.modelUpdated()
 
+    def __del__(self):
+        self.model.unregisterObserver(self)
+
     def modelUpdated(self):
         self.view.modelUpdated(self.model)
 
-class Presenter(BasePresenter):
+
+
+class MasterPresenter(BasePresenter):
     
-    def __init__(self, model, view):
+    def __init__(self, model, view, application):
         BasePresenter.__init__(self, model, view)
+        self.application = application
     
-    def updateText(self):
+    def updateText(self, updateText):
+        self.model.setNextText(updateText)
         self.model.transferText()
+
+    def requestCreateListener(self):
+        self.application.createSlaveWindow()
 
 class ApplicationController(BasePresenter):
 
@@ -29,10 +39,10 @@ class ApplicationController(BasePresenter):
         childPresenter.view.bindToParent(viewParent)
 
     def createMasterWindow(self):
-        return self.factory.createMasterWindow(self)
+        return self.factory.createMasterComponent(self)
 
     def createSlaveWindow(self):
-        return self.factory.createSlaveWindow(self)
+        return self.factory.createSlaveComponent(self)
 
     def show(self):
         self.view.show()
