@@ -20,7 +20,7 @@ import sys
 def main():
     root = Tk()
     model = Model()
-    root.geometry("250x150+300+300")
+    root.geometry("400x300+300+300")
     view = View(root)
     presenter = Presenter(model, view)
 

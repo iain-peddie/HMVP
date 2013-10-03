@@ -1,4 +1,4 @@
-from tkinter import BOTH
+from tkinter import BOTH, Listbox, END
 from tkinter.ttk import Frame, Button, Style, Entry
 
 class View:
@@ -19,25 +19,29 @@ class View:
 
         self.top.style = Style()
         self.top.style.theme_use("default")
-        self.top.pack(fill=BOTH, expand=1)
+        self.top.grid(sticky="nsew")
 
-        self.quitButton = Button(self.top, text="",
-                                 command = self.top.quit)
-        self.quitButton.place(x=10, y=50)
-        
-        self.updateButton = Button(self.top, text="",
+        self.updateButton = Button(self.top, text="Update",
                                    command = self.updateButton_clicked)
-        self.updateButton.place(x=10,y=80)
+        self.updateButton.grid(row = 0, column = 0)
+
+        self.transfersList = Listbox(self.top)
+        self.transfersList.grid(row = 1, column = 0, sticky = "nsew", columnspan = 2)
 
         self.updateText = Entry(self.top, text="")
-        self.updateText.place(x=150, y=80)
+        self.updateText.grid(row = 0, column = 1)
 
     def modelUpdated(self, model):
-        self.quitButton["text"] = model.getTitle()
-        self.updateButton["text"] = model.getCurrentText()
-        current = self.updateText.get()
-        self.updateText.delete(0, len(current))
+        currentText = model.getCurrentText()
+        # temporarily, make it just the last item
+        self.updateButton["text"] = currentText[-1]
+        currentUpdate = self.updateText.get()
+        self.updateText.delete(0, len(currentUpdate))
         self.updateText.insert(0, model.getNextText())
+
+        self.transfersList.delete(0, END)
+        for line in currentText:
+            self.transfersList.insert(END, line)
 
     def updateButton_clicked(self):
         # This line means we're not in MVC or MVP, but MV:

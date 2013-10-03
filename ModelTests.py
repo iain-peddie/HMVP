@@ -36,13 +36,13 @@ class ModelTests(TestCase):
         model = Model()
         
         # When
-        textBefore = model.getCurrentText()
+        textBefore = model.getCurrentText()[:]
         model.transferText()
         textAfter = model.getCurrentText()
 
         # Then
-        expect(textBefore).toEqual("Click me")
-        expect(textAfter).toEqual("I go to the button")
+        expect(textBefore).toEqual(["Click button to transfer text"])
+        expect(textAfter).toEqual(["Click button to transfer text", "I go to the button"])
 
     def test_model_transfer_triggers_modelChanged(self):
         # Where

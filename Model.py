@@ -1,7 +1,7 @@
 class Model:
     def __init__(self):
         self._observers = []
-        self._currentText = "Click me"
+        self._currentText = ["Click button to transfer text"]
         self._nextText = "I go to the button"
 
     def getTitle(self):
@@ -14,7 +14,7 @@ class Model:
         return self._nextText
 
     def transferText(self):
-        self._currentText = self._nextText
+        self._currentText.append(self._nextText)
         self._fireModelUpdated()
 
     def registerObserver(self, observer):

@@ -37,7 +37,7 @@ class PresenterTests(TestCase):
         presenter.updateText()
 
         # Then
-        expect(model.getCurrentText()).toEqual("I go to the button")
+        expect(model.getCurrentText()).toEqual(["Click button to transfer text", "I go to the button"])
 
     def test_presenter_catches_model_updated_event_and_presents_to_view(self):
         # Where
