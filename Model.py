@@ -1,5 +1,4 @@
 class Model:
-
     def __init__(self):
         self._observers = []
         self._currentText = "Click me"

@@ -42,7 +42,8 @@ class View:
     def modelUpdated(self, model):
         self.quitButton["text"] = self.model.getTitle()
         self.updateButton["text"] = self.model.getCurrentText()
-        self.updateText.delete(0)
+        current = self.updateText.get()
+        self.updateText.delete(0, len(current))
         self.updateText.insert(0, self.model.getNextText())
 
     def updateButton_clicked(self):

@@ -3,7 +3,7 @@
 # First attempt at creating a GUI - this follows the TkInter tutorial
 # and therfore doesn't make an attempt to use 'proper design'
 
-from tkinter import Tk, BOTH
+from tkinter import Tk, BOTH, END
 
 from WellBehavedPython.api import *
 from WellBehavedPython.TestSuite import *
@@ -29,8 +29,9 @@ def unitTest():
     suite.add(ModelTests.suite())
     suite.add(ControllerTests.suite())
     runner = VerboseConsoleTestRunner()
-    runner.run(suite)
-    sys.stdout.flush()
+    results = runner.run(suite)
+    if results.countErrors() + results.countFailures() > 0:
+        exit(1)
 
 if __name__ == "__main__":
     unitTest()
