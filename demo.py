@@ -15,26 +15,26 @@ from Presenter import *
 from Model import *
 from View import *
 
+from ComponentFactory import *
+
 import sys
 
 def main():
     model = Model()
 
-    applicationView = ApplicationView()
-    
-    
-    masterView = MasterView(applicationView.createWindow())
-    masterPresenter = Presenter(model, masterView)
+    factory = ComponentFactory()
+    application = factory.createApplication()
+    masterPresenter = factory.createMasterComponent(application)
+    slavePresenter = factory.createSlaveComponent(application)
 
-    slaveView = SlaveView(applicationView.createWindow())
-    slavePresenter = Presenter(model, slaveView)
 
-    applicationView.show()
+    application.show()
 
 def unitTest():
     suite = TestSuite()
     suite.add(ModelTests.suite())
     suite.add(PresenterTests.suite())
+    suite.add(ApplicationControllerTests.suite())
     runner = VerboseConsoleTestRunner()
     results = runner.run(suite)
     if results.countErrors() + results.countFailures() > 0:
