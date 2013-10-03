@@ -11,13 +11,6 @@ class BaseModel:
     def unregisterObserver(self, observer):        
         self._observers.remove(observer)
 
-class Model(BaseModel):
-
-    def __init__(self):
-        BaseModel.__init__(self)
-        self._currentText = ["Click button to transfer text"]
-        self._nextText = "I go to the button"
-
     def _fireModelUpdated(self):
         for observer in self._observers:
             try:
@@ -26,8 +19,12 @@ class Model(BaseModel):
                 print("problem in model updated event")
                 print(ex)
 
-    def getCurrentText(self):
-        return self._currentText
+class MasterModel(BaseModel):
+
+    def __init__(self):
+        BaseModel.__init__(self)
+        self._nextText = "I go to the button"
+        self.numberOfEntries = 1
 
     def getNextText(self):
         return self._nextText
@@ -35,9 +32,21 @@ class Model(BaseModel):
     def setNextText(self, text):
         self._nextText = text
         self._fireModelUpdated()
+    
+    def resetNextText(self):
+        self.numberOfEntries = self.numberOfEntries + 1
+        self._nextText = "{} items".format(self.numberOfEntries + 1)
+        self._fireModelUpdated()
 
-    def transferText(self):
-        self._currentText.append(self._nextText)
-        self._nextText = "{} items".format(len(self._currentText) + 1)
+class SlaveModel(BaseModel):
+    def __init__(self):
+        BaseModel.__init__(self)
+        self._currentText = ["Click button to transfer text"]
+
+    def getCurrentText(self):
+        return self._currentText
+
+    def appendCurrentText(self, newText):
+        self._currentText.append(newText)
         self._fireModelUpdated()
 

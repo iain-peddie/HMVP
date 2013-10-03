@@ -16,7 +16,7 @@ class MasterPresenterTests(TestCase):
         TestCase.__init__(self, name)
 
     def before(self):
-        self.model = Model()
+        self.model = MasterModel()
         self.view = MockView()
         self.presenter = MasterPresenter(self.model, self.view, self)
         self.createSlaveWindowCalled = False
@@ -25,25 +25,13 @@ class MasterPresenterTests(TestCase):
     def createSlaveWindow(self):
         self.createSlaveWindowCalled = True
 
-    def test_setup(self):
-        # Where
-        presenter = self.presenter
-        model = self.model
-
-        # When
-        presenter.updateText("asdf")
-
-        # Then
-        expect(model.getCurrentText()).toEqual(["Click button to transfer text", "asdf"])
-        expect(model.getNextText()).toEqual("3 items")
-
     def test_presenter_catches_model_updated_event_and_presents_to_view(self):
         # Where
         presetner = self.presenter
         model = self.model
 
         # When
-        model.transferText()
+        model.setNextText('something')
 
         # Then
         expect(self.view.updated).toBeTrue()

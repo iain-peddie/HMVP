@@ -72,8 +72,7 @@ class MasterView(BaseView):
         self.updateText.grid(row = 0, column = 1)
 
     def updateFromModel(self, model):
-        currentText = model.getCurrentText()
-
+        
         # temporarily, make it just the last item
         currentUpdate = self.updateText.get()
         self.updateText.delete(0, len(currentUpdate))
@@ -109,7 +108,6 @@ class SlaveView(BaseView):
         for line in currentText:
             self.transfersList.insert(END, line)
 
-    def updateButton_clicked(self):
-        # This line means we're not in MVC or MVP, but MV:
+    def updateButton_clicked(self):    
         self.presenter.updateText()
     

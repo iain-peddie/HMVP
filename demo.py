@@ -29,7 +29,7 @@ def main():
 
 def unitTest():
     suite = TestSuite()
-    suite.add(ModelTests.suite())
+    suite.add(MasterModelTests.suite())
     suite.add(MasterPresenterTests.suite())
     suite.add(ApplicationControllerTests.suite())
     runner = VerboseConsoleTestRunner()

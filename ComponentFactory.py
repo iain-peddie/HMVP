@@ -6,7 +6,7 @@ from Mocks import *
 class ComponentFactory:
 
     def __init__(self):
-        self.sharedModel = Model()
+        pass
 
     def createApplication(self):
         model = BaseModel()
@@ -15,13 +15,13 @@ class ComponentFactory:
 
     def createMasterComponent(self, application):    
         view = MasterView()
-        presenter = MasterPresenter(self.sharedModel, view, application)
+        presenter = MasterPresenter(MasterModel(), view, application)
         application.addChild(presenter)
         return presenter
 
     def createSlaveComponent(self, application):    
         view = SlaveView()
-        presenter = BasePresenter(self.sharedModel, view)
+        presenter = SlavePresenter(SlaveModel(), view, application)
         application.addChild(presenter)
         return presenter
 

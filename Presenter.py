@@ -13,8 +13,6 @@ class BasePresenter:
     def modelUpdated(self):
         self.view.modelUpdated(self.model)
 
-
-
 class MasterPresenter(BasePresenter):
     
     def __init__(self, model, view, application):
@@ -23,10 +21,20 @@ class MasterPresenter(BasePresenter):
     
     def updateText(self, updateText):
         self.model.setNextText(updateText)
-        self.model.transferText()
+        # TODO : communcate with parent controller
 
     def requestCreateListener(self):
         self.application.createSlaveWindow()
+
+class SlavePresenter(BasePresenter):
+    
+    def __init__(self, model, view, application):
+        BasePresenter.__init__(self, model, view)
+        self.application = application
+
+    def appendText(self, updateText):
+        self.model.appendCurrentText()
+    
 
 class ApplicationController(BasePresenter):
 

@@ -1,9 +1,9 @@
 from WellBehavedPython.TestCase import TestCase
 from WellBehavedPython.api import *
 
-from Model import Model
+from Model import *
 
-class ModelTests(TestCase):
+class MasterModelTests(TestCase):
     
     def __init__(self, name):
         TestCase.__init__(self, name)
@@ -13,7 +13,7 @@ class ModelTests(TestCase):
 
     def test_model_provides_title(self):
         # Where
-        model = Model()
+        model = MasterModel()
 
         # When
         title = model.getTitle()
@@ -23,7 +23,7 @@ class ModelTests(TestCase):
 
     def test_model_provides_next_text(self):
         # Where
-        model = Model()
+        model = MasterModel()
 
         # When
         title = model.getNextText()
@@ -33,11 +33,11 @@ class ModelTests(TestCase):
 
     def test_model_updates_text(self):
         # Where
-        model = Model()
+        model = SlaveModel()
         
         # When
         textBefore = model.getCurrentText()[:]
-        model.transferText()
+        model.appendCurrentText('I go to the button')
         textAfter = model.getCurrentText()
 
         # Then
@@ -46,24 +46,24 @@ class ModelTests(TestCase):
 
     def test_model_transfer_triggers_modelChanged(self):
         # Where
-        model = Model()
+        model = SlaveModel()
         model.registerObserver(self)
 
         # When
-        model.transferText()
+        model.appendCurrentText("something")
 
         # Then
         expect(self.modelUpdatedReceived).toBeTrue()
 
     def test_model_creates_different_next_text_each_time(self):
         # Where
-        model = Model()
+        model = MasterModel()
         
         # When        
         initialNextText = model.getNextText()
-        model.transferText()
+        model.resetNextText()
         firstNextText = model.getNextText()
-        model.transferText()
+        model.resetNextText()
         secondNextText = model.getNextText()
 
         # Then
@@ -73,12 +73,12 @@ class ModelTests(TestCase):
 
     def test_can_unregister_observer(self):
         # Where
-        model = Model();
+        model = MasterModel();
         model.registerObserver(self)
         model.unregisterObserver(self)
 
         # When
-        model.transferText()
+        model.setNextText("")
 
         # Then
         expect(self.modelUpdatedReceived).toBeFalse()
