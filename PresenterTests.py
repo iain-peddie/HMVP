@@ -2,17 +2,23 @@ from WellBehavedPython.TestCase import TestCase
 from WellBehavedPython.api import *
 
 from Model import Model
-from Controller import Controller
+from Presenter import Presenter
+
+import weakref
 
 class MockView:
 
-    def assignController(self, controller):
-        self.controller = controller
+    def __init__(self):
+        self.updated = False
 
-    def modelUpdated(self, model):
+    def assignPresenter(self, presneter):
         pass
 
-class ControllerTests(TestCase):
+    def modelUpdated(self, model):
+        self.updated = True
+
+
+class PresenterTests(TestCase):
     
     def __init__(self, name):
         TestCase.__init__(self, name)
@@ -20,15 +26,26 @@ class ControllerTests(TestCase):
     def before(self):
         self.model = Model()
         self.view = MockView()
-        self.controller = Controller(self.model, self.view)
+        self.presenter = Presenter(self.model, self.view)
 
     def test_setup(self):
         # Where
-        controller = self.controller
+        presenter = self.presenter
         model = self.model
 
         # When
-        controller.updateText()
+        presenter.updateText()
 
         # Then
         expect(model.getCurrentText()).toEqual("I go to the button")
+
+    def test_presenter_catches_model_updated_event_and_presents_to_view(self):
+        # Where
+        presetner = self.presenter
+        model = self.model
+
+        # When
+        model.transferText()
+
+        # Then
+        expect(self.view.updated).toBeTrue()

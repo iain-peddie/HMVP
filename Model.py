@@ -24,5 +24,5 @@ class Model:
         for observer in self._observers:
             try:
                 observer.modelUpdated(self)
-            except ex as Exception:
+            except Exception as ex:
                 print("problem in model updated event")
