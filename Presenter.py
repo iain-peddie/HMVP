@@ -27,15 +27,17 @@ class HierarchicalPresenter(BasePresenter):
     def bindToParent(self, parent):
         self.parent = parent
 
-    def sendUpwardsMessage(self, message, data):
-        if self.tryToHandleMessage(message, data):
-            return
+    def sendUpwardsMessage(self, message, data, bypassSelf = False):
+        if not bypassSelf:
+            if self.tryToHandleMessage(message, data):
+                return
         if self.parent is not None:
             self.parent.sendUpwardsMessage(message, data)
 
-    def sendDownwardsMessage(self, message, data):
-        if self.tryToHandleMessage(message, data):
-            return
+    def sendDownwardsMessage(self, message, data, bypassSelf = False):
+        if not bypassSelf:
+            if self.tryToHandleMessage(message, data):
+                return
         for child in self.children:
             child.sendDownwardsMessage(message, data)
 
@@ -48,7 +50,8 @@ class MasterPresenter(HierarchicalPresenter):
         HierarchicalPresenter.__init__(self, model, view)
     
     def updateText(self, updateText):
-        self.model.setNextText(updateText)
+        self.sendUpwardsMessage("TextUpdated", updateText)
+        self.model.resetNextText()
 
     def requestCreateListener(self):
         self.sendUpwardsMessage("CreateSlaveWindow", None)
@@ -99,9 +102,11 @@ class ApplicationController(HierarchicalPresenter):
         handled = True
         if message == "CreateSlaveWindow":
             window = self.createSlaveWindow()
-            self.addChild(window)
         else:
-            handled = HierarchicalPresenter.tryToHandleMessage(message, data)
+            handled = HierarchicalPresenter.tryToHandleMessage(self, message, data)
+
+        if not handled:
+            self.sendDownwardsMessage(message, data, True)
         
-        return handled
+        return True
         

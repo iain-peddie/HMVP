@@ -29,8 +29,10 @@ class MockHierarchicalPresenter(HierarchicalPresenter):
         HierarchicalPresenter.__init__(self, model, view)
         self.handledMessages = handledMessages
         self.recordedMessages = []
+        self.recordedData = []
 
     def tryToHandleMessage(self, message, data):
         self.recordedMessages.append(message)
+        self.recordedData.append(data)
         return message in self.handledMessages
     

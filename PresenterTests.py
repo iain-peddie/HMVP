@@ -21,12 +21,6 @@ class MasterPresenterTests(TestCase):
         self.presenter = MasterPresenter(self.model, self.view)
         self.parent = MockHierarchicalPresenter(self.model, self.view)
         self.parent.addChild(self.presenter)
-        self.createSlaveWindowCalled = False
-
-        # this method makes the test class a mock application controller
-
-    def createSlaveWindow(self):
-        self.createSlaveWindowCalled = True
 
     def test_presenter_catches_model_updated_event_and_presents_to_view(self):
         # Where
@@ -48,7 +42,19 @@ class MasterPresenterTests(TestCase):
 
         # Then
         expect(self.parent.recordedMessages).toContain("CreateSlaveWindow")
-#        expect(self.createSlaveWindowCalled).toBeTrue()
+
+    def test_presenter_updateText_sends_TextUpdated_message(self):
+        # Where
+        presenter = self.presenter
+        sentText = "I am the sent text"
+        
+        # When
+        presenter.updateText(sentText)
+
+        # Then
+        expect(self.parent.recordedMessages).toContain("TextUpdated")
+        expect(self.parent.recordedData).toContain(sentText)
+        expect(self.model.getNextText()).toEqual("3 items")
 
     def test_send_unhandled_upwards_message_goes_to_self_and_parent(self):
         # Where
@@ -79,6 +85,22 @@ class MasterPresenterTests(TestCase):
         # Then
         expect(presenter.recordedMessages).toContain("TestMessage", "Message should be sent to child")
         expect(parent.recordedMessages).Not.toContain("TestMessage", "Message should be sent to parent")
+
+    def test_that_upwards_messages_can_bypass_self_but_not_parent(self):
+        # Where
+        model = BaseModel()
+        view = BaseView()
+        parent = MockHierarchicalPresenter(model, view)
+        presenter = MockHierarchicalPresenter(model, view)
+        parent.addChild(presenter)
+
+        # When
+        presenter.sendUpwardsMessage("TestMessage", None, bypassSelf = True)
+
+        # Then
+        expect(presenter.recordedMessages).Not.toContain("TestMessage", "message should have bypassed child")
+        expect(parent.recordedMessages).toContain("TestMessage", "message should have been sent to parent")
+        
 
     def test_that_handled_downwards_message_not_sent_to_children(self):
         # Where
@@ -132,7 +154,25 @@ class MasterPresenterTests(TestCase):
         # Then
         expect(parent.recordedMessages).toContain("TestMessage", "Message should be sent to parent")
         expect(child1.recordedMessages).toContain("TestMessage", "Message should go to children")
-        expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")        
+        expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")
+
+    def test_that_downwards_messages_can_bypass_self_but_not_children(self):
+        # Where
+        model = BaseModel()
+        view = BaseView()
+        parent = MockHierarchicalPresenter(model, view)
+        child1 =  MockHierarchicalPresenter(model, view)
+        child2 = MockHierarchicalPresenter(model, view)
+        parent.addChild(child1)
+        parent.addChild(child2)
+
+        # When
+        parent.sendDownwardsMessage("TestMessage", ["TestData"], bypassSelf = True)
+        
+        # Then
+        expect(parent.recordedMessages).Not.toContain("TestMessage", "Message should bypass parent")
+        expect(child1.recordedMessages).toContain("TestMessage", "Message should go to children")
+        expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")
 
 class SlavePresenterTests(TestCase):
 
@@ -206,5 +246,17 @@ class ApplicationControllerTests(TestCase):
         # Then
         expect(self.factory.lastComponent).toEqual("slave")
         expect(len(self.controller.children)).toEqual(1)
+
+    def test_that_unexpected_messages_are_sent_downwards(self):
+        # Where
+        controller = self.controller
+        child = self.factory.createSlaveComponent(controller)
+
+        # When
+        controller.tryToHandleMessage("Unexpected" , "")
+        
+        # Then
+        expect(child.recordedMessages).toContain("Unexpected")
+        
 
         

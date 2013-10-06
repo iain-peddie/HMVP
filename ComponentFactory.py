@@ -39,16 +39,19 @@ class MockComponentFactory:
 
     def createMasterComponent(self, parent):
         self.lastComponent = "master"
-        return self._createComponent()
+        return self._createComponent(parent)
 
     def createSlaveComponent(self, parent):
         self.lastComponent = "slave"
-        return self._createComponent()
+        return self._createComponent(parent)
 
-    def _createComponent(self):
+    def _createComponent(self, parent):
         model = BaseModel()
         view = MockView()
-        return HierarchicalPresenter(model, view)
+        component = MockHierarchicalPresenter(model, view)
+        parent.addChild(component)
+        return component
+        
 
 
 
