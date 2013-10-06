@@ -42,38 +42,49 @@ class HierarchicalPresenter(BasePresenter):
     def tryToHandleMessage(self, message, data):
         return False
 
-class MasterPresenter(BasePresenter):
+class MasterPresenter(HierarchicalPresenter):
     
-    def __init__(self, model, view, application):
-        BasePresenter.__init__(self, model, view)
-        self.application = application
+    def __init__(self, model, view):
+        HierarchicalPresenter.__init__(self, model, view)
     
     def updateText(self, updateText):
         self.model.setNextText(updateText)
-        # TODO : communcate with parent controller
 
     def requestCreateListener(self):
-        self.application.createSlaveWindow()
+        self.sendUpwardsMessage("CreateSlaveWindow", None)
 
-class SlavePresenter(BasePresenter):
+
+class SlavePresenter(HierarchicalPresenter):
     
-    def __init__(self, model, view, application):
-        BasePresenter.__init__(self, model, view)
-        self.application = application
+    def __init__(self, model, view):
+        HierarchicalPresenter.__init__(self, model, view)
 
     def appendText(self, updateText):
-        self.model.appendCurrentText()
-    
+        self.model.appendCurrentText(updateText)
 
-class ApplicationController(BasePresenter):
+    def tryToHandleMessage(self, message, data):
+        handled = False
+        if message == "TextUpdated":
+            self.appendText(data)
+            handled = True
+        else:
+            # It is important to delegate to base class in
+            # else clause. This allows default behavior to
+            # be added to the base class
+            return HierarchicalPresenter.tryToHandleMessage(self, message, data)
+        
+        return handled
+    
+class ApplicationController(HierarchicalPresenter):
 
     def __init__(self, model, view, factory):
-        BasePresenter.__init__(self, model, view)
+        HierarchicalPresenter.__init__(self, model, view)
         self.factory = factory
 
     def addChild(self, childPresenter):
         viewParent = self.view.createWindow()
         childPresenter.view.bindToParent(viewParent)
+        HierarchicalPresenter.addChild(self, childPresenter)
 
     def createMasterWindow(self):
         return self.factory.createMasterComponent(self)
@@ -84,6 +95,13 @@ class ApplicationController(BasePresenter):
     def show(self):
         self.view.show()
 
-
+    def tryToHandleMessage(self, message, data):
+        handled = True
+        if message == "CreateSlaveWindow":
+            window = self.createSlaveWindow()
+            self.addChild(window)
+        else:
+            handled = HierarchicalPresenter.tryToHandleMessage(message, data)
         
+        return handled
         

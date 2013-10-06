@@ -18,10 +18,13 @@ class MasterPresenterTests(TestCase):
     def before(self):
         self.model = MasterModel()
         self.view = MockView()
-        self.presenter = MasterPresenter(self.model, self.view, self)
+        self.presenter = MasterPresenter(self.model, self.view)
+        self.parent = MockHierarchicalPresenter(self.model, self.view)
+        self.parent.addChild(self.presenter)
         self.createSlaveWindowCalled = False
 
         # this method makes the test class a mock application controller
+
     def createSlaveWindow(self):
         self.createSlaveWindowCalled = True
 
@@ -36,7 +39,7 @@ class MasterPresenterTests(TestCase):
         # Then
         expect(self.view.updated).toBeTrue()
 
-    def test_presnter_delegates_cascades_request_to_parent(self):
+    def test_presenter_delegates_cascades_request_to_parent(self):
         # Where
         presenter = self.presenter
 
@@ -44,7 +47,8 @@ class MasterPresenterTests(TestCase):
         presenter.requestCreateListener()
 
         # Then
-        expect(self.createSlaveWindowCalled).toBeTrue()
+        expect(self.parent.recordedMessages).toContain("CreateSlaveWindow")
+#        expect(self.createSlaveWindowCalled).toBeTrue()
 
     def test_send_unhandled_upwards_message_goes_to_self_and_parent(self):
         # Where
@@ -130,6 +134,23 @@ class MasterPresenterTests(TestCase):
         expect(child1.recordedMessages).toContain("TestMessage", "Message should go to children")
         expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")        
 
+class SlavePresenterTests(TestCase):
+
+    def __init__(self, name):
+        TestCase.__init__(self, name)
+
+    def test_that_TextUpdated_meessage_handled_by_appending_text_to_model(self):
+        # Where
+        model = SlaveModel()
+        view = MockView()
+        presenter = SlavePresenter(model, view)
+
+        # When
+        presenter.tryToHandleMessage("TextUpdated", "UpdatedText")
+        
+        # Then
+        expect(model.getCurrentText()).toContain("UpdatedText")
+
 class ApplicationControllerTests(TestCase):
     def __init__(self, name):
         TestCase.__init__(self, name)
@@ -144,7 +165,7 @@ class ApplicationControllerTests(TestCase):
         # Where
         controller = self.controller
         childView = MockView()
-        child = MasterPresenter(self.model, childView, self)
+        child = MasterPresenter(self.model, childView)
 
         # When
         createdBefore = childView.widgetsCreated
@@ -152,7 +173,7 @@ class ApplicationControllerTests(TestCase):
         createdAfter = childView.widgetsCreated
 
         # Then
-        expect(createdBefore).toBeFalse("widgets should not be created before adding prsenter to parent")
+        expect(createdBefore).toBeFalse("widgets should not be created before adding presenter to parent")
         expect(createdAfter).toBeTrue("widgets should be created after adding presenter to parent")
 
     def test_calling_show_shows_view(self):
@@ -180,8 +201,10 @@ class ApplicationControllerTests(TestCase):
         controller = self.controller
 
         # When
-        child = controller.createSlaveWindow()
+        controller.tryToHandleMessage("CreateSlaveWindow", None)
 
         # Then
         expect(self.factory.lastComponent).toEqual("slave")
+        expect(len(self.controller.children)).toEqual(1)
+
         

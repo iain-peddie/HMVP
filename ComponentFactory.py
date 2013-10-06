@@ -15,13 +15,13 @@ class ComponentFactory:
 
     def createMasterComponent(self, application):    
         view = MasterView()
-        presenter = MasterPresenter(MasterModel(), view, application)
+        presenter = MasterPresenter(MasterModel(), view)
         application.addChild(presenter)
         return presenter
 
     def createSlaveComponent(self, application):    
         view = SlaveView()
-        presenter = SlavePresenter(SlaveModel(), view, application)
+        presenter = SlavePresenter(SlaveModel(), view)
         application.addChild(presenter)
         return presenter
 
@@ -48,7 +48,7 @@ class MockComponentFactory:
     def _createComponent(self):
         model = BaseModel()
         view = MockView()
-        return BasePresenter(model, view)
+        return HierarchicalPresenter(model, view)
 
 
 
