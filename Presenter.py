@@ -13,6 +13,21 @@ class BasePresenter:
     def modelUpdated(self):
         self.view.modelUpdated(self.model)
 
+class HierarchicalPresenter(BasePresenter):
+
+    def __init__(self, model, view, application):
+        BasePresenter.__init__(self, model, view)
+        self.application = application
+
+    def sendUpwardsMessage(self, message, data):
+        pass
+
+    def sendDownwardsMessage(self, message, data):
+        pass
+
+    def tryToHandleMessage(self, message, data):
+        return False
+
 class MasterPresenter(BasePresenter):
     
     def __init__(self, model, view, application):

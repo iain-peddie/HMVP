@@ -1,4 +1,5 @@
 from View import BaseView
+from Presenter import HierarchicalPresenter
 
 class MockView(BaseView):
 
@@ -21,3 +22,8 @@ class MockView(BaseView):
 
     def show(self):
         self.shown = True
+
+class MockHierarchicalPresenter(HierarchicalPresenter):
+
+    def __init__(self, model, view, parent):
+        HierarchicalPresenter.__init__(self, model, view, parent)

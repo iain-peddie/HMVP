@@ -46,6 +46,19 @@ class MasterPresenterTests(TestCase):
         # Then
         expect(self.createSlaveWindowCalled).toBeTrue()
 
+    def test_send_unhandled_upwards_message_goes_to_self_and_parent(self):
+        # Where
+        model = BaseModel()
+        view = BaseView()
+        parent = MockHierarchicalPresenter(model, view, None)
+        presenter = MockHierarchicalPresenter(model, view, parent)
+
+
+        # When
+        presenter.sendUpwardsMessage("TestMessage", ["Test data"]);
+        expect(presenter.recordedMessages).toContain("TestMessage")
+        expect(parent.recordedMessages).toContain("TestMessage")
+
 class ApplicationControllerTests(TestCase):
     def __init__(self, name):
         TestCase.__init__(self, name)
