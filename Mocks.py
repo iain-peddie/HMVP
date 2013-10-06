@@ -25,5 +25,12 @@ class MockView(BaseView):
 
 class MockHierarchicalPresenter(HierarchicalPresenter):
 
-    def __init__(self, model, view, parent):
-        HierarchicalPresenter.__init__(self, model, view, parent)
+    def __init__(self, model, view, handledMessages = []):
+        HierarchicalPresenter.__init__(self, model, view)
+        self.handledMessages = handledMessages
+        self.recordedMessages = []
+
+    def tryToHandleMessage(self, message, data):
+        self.recordedMessages.append(message)
+        return message in self.handledMessages
+    

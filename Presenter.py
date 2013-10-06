@@ -15,15 +15,29 @@ class BasePresenter:
 
 class HierarchicalPresenter(BasePresenter):
 
-    def __init__(self, model, view, application):
+    def __init__(self, model, view):
         BasePresenter.__init__(self, model, view)
-        self.application = application
+        self.parent = None
+        self.children = []
+
+    def addChild(self, child):
+        child.bindToParent(self)
+        self.children.append(child)
+
+    def bindToParent(self, parent):
+        self.parent = parent
 
     def sendUpwardsMessage(self, message, data):
-        pass
+        if self.tryToHandleMessage(message, data):
+            return
+        if self.parent is not None:
+            self.parent.sendUpwardsMessage(message, data)
 
     def sendDownwardsMessage(self, message, data):
-        pass
+        if self.tryToHandleMessage(message, data):
+            return
+        for child in self.children:
+            child.sendDownwardsMessage(message, data)
 
     def tryToHandleMessage(self, message, data):
         return False
