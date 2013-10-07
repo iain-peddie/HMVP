@@ -7,7 +7,6 @@ from View import *
 from Mocks import *
 from ComponentFactory import MockComponentFactory
 
-import weakref
 
 class TestingHierarchicalView(HierarchicalView):
 
@@ -15,7 +14,7 @@ class TestingHierarchicalView(HierarchicalView):
         HierarchicalView.__init__(self)
         self.attachmentPoint = injectedAttachmentPoint
 
-    def getAttachmentPoint(self):
+    def getAttachmentPoint(self, name):
         return self.attachmentPoint
 
 class HierarhicalPresenterTests(TestCase):
@@ -171,6 +170,21 @@ class HierarhicalPresenterTests(TestCase):
         # Then
         expect(childView.bound).toBeTrue("Child should have been bound to parent")
         expect(childView.parent).toEqual(mockAttachmentPoint)
+
+    def test_that_component_not_added_if_view_not_added(self):
+        # Where
+        mockAttachmentPoint = "ChildAttachmentPoint"
+        parentView = MockHierarchicalView("Mock")
+        childView = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(BaseModel(), parentView)
+        child = MockHierarchicalPresenter(BaseModel(), childView)
+
+        # When
+        parent.addChild(child)
+
+        # Then
+        expect(childView.bound).toBeFalse("Child should have been bound to parent")
+        expect(parent.children).Not.toContain(child)
     
 
 class MasterPresenterTests(TestCase):
@@ -299,7 +313,8 @@ class ApplicationControllerTests(TestCase):
     def test_adding_child_creates_widgets_in_childs_view(self):
         # Where
         controller = self.controller
-        childView = MockView()
+        controller.view = TestingHierarchicalView("MockAttachmentPoint")
+        childView = MockHierarchicalView()
         child = MasterPresenter(self.model, childView)
 
         # When
@@ -353,7 +368,7 @@ class ApplicationControllerTests(TestCase):
         expect(self.factory.lastComponent).toEqual("master")
         expect(len(self.controller.children)).toEqual(1)        
 
-    def test_that_Controlelr_can_create_child_creator_component(self):
+    def test_that_application_can_create_child_creator_component(self):
         # Where
         controller = self.controller
 
@@ -363,6 +378,29 @@ class ApplicationControllerTests(TestCase):
         # Then
         expect(self.factory.lastComponent).toEqual("child creator")
         expect(len(self.controller.children)).toEqual(1)        
+
+    def test_that_application_can_create_master_and_child_component(self):
+        # Where
+        controller = self.controller
+
+        # When
+        controller.tryToHandleMessage("CreateMasterAndChildWindow", None)
+
+        # Then
+        expect(self.factory.lastComponent).toEqual("master and child")
+        expect(len(self.controller.children)).toEqual(1)
+
+    def test_that_application_can_create_child_and_master_component(self):
+        # Where
+        controller = self.controller
+
+        # When
+        controller.tryToHandleMessage("CreateChildAndMasterWindow", None)
+
+        # Then
+        expect(self.factory.lastComponent).toEqual("child and master")
+        expect(len(self.controller.children)).toEqual(1)
+
 
     def test_that_unexpected_messages_are_sent_downwards(self):
         # Where

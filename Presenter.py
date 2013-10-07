@@ -15,15 +15,16 @@ class BasePresenter:
 
 class HierarchicalPresenter(BasePresenter):
 
-    def __init__(self, model, view):
+    def __init__(self, model, view, componentName):
         BasePresenter.__init__(self, model, view)
+        self.componentName = componentName
         self.parent = None
         self.children = []
 
     def addChild(self, child):
-        child.bindToParent(self)
-        self.children.append(child)
-        self.view.bindChild(child.view)
+        if self.view.tryToBindChild(child.view, child.componentName):
+            child.bindToParent(self)
+            self.children.append(child)
 
     def bindToParent(self, parent):
         self.parent = parent
@@ -48,7 +49,7 @@ class HierarchicalPresenter(BasePresenter):
 class MasterPresenter(HierarchicalPresenter):
     
     def __init__(self, model, view):
-        HierarchicalPresenter.__init__(self, model, view)
+        HierarchicalPresenter.__init__(self, model, view, "Master")
     
     def updateText(self, updateText):
         self.sendUpwardsMessage("TextUpdated", updateText)
@@ -57,7 +58,7 @@ class MasterPresenter(HierarchicalPresenter):
 class SlavePresenter(HierarchicalPresenter):
     
     def __init__(self, model, view):
-        HierarchicalPresenter.__init__(self, model, view)
+        HierarchicalPresenter.__init__(self, model, view, "Slave")
 
     def appendText(self, updateText):
         self.model.appendCurrentText(updateText)
@@ -78,7 +79,7 @@ class SlavePresenter(HierarchicalPresenter):
 class ChildCreatorPresenter(HierarchicalPresenter):
 
     def __init__(self, model, view):
-        HierarchicalPresenter.__init__(self, model, view)
+        HierarchicalPresenter.__init__(self, model, view, "ChildCreator")
 
     def createMasterWindow(self):
         self.sendUpwardsMessage("CreateMasterWindow", None)
@@ -89,7 +90,7 @@ class ChildCreatorPresenter(HierarchicalPresenter):
 class MasterAndSlavePresenter(HierarchicalPresenter):
     
     def __init__(self, model, view):
-        HierarchicalPresenter.__init__(self, model, view)
+        HierarchicalPresenter.__init__(self, model, view, "MasterAndSlave")
 
     def tryToHandleMessage(self, message, data):
         if message == "TextUpdated":
@@ -101,7 +102,7 @@ class MasterAndSlavePresenter(HierarchicalPresenter):
 class ApplicationController(HierarchicalPresenter):
 
     def __init__(self, model, view, factory):
-        HierarchicalPresenter.__init__(self, model, view)
+        HierarchicalPresenter.__init__(self, model, view, "Application")
         self.factory = factory
 
     def createMasterWindow(self):
@@ -109,6 +110,12 @@ class ApplicationController(HierarchicalPresenter):
 
     def createSlaveWindow(self):
         return self.factory.createSlaveComponent(self)
+
+    def createMasterAndChildWindow(self):
+        return self.factory.createMasterAndChildComponent(self)
+
+    def createChildAndMasterWindow(self):
+        return self.factory.createChildAndMasterComponent(self)
 
     def createChildCreatorWindow(self):
         return self.factory.createChildCreatorComponent(self)
@@ -122,6 +129,10 @@ class ApplicationController(HierarchicalPresenter):
             self.createSlaveWindow()
         elif message == "CreateMasterWindow":
             self.createMasterWindow()
+        elif message == "CreateMasterAndChildWindow":
+            self.createMasterAndChildWindow()
+        elif message == "CreateChildAndMasterWindow":
+            self.createChildAndMasterWindow()
         else:
             handled = HierarchicalPresenter.tryToHandleMessage(self, message, data)
 

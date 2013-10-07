@@ -4,12 +4,60 @@ from tkinter.ttk import Frame, Button, Style, Entry
 class BaseView:
 
     def __init__(self):
-        self.bound = False
         self.presenter = []
         self.presenterAssigned = False
 
     def assignPresenter(self, presenter):
         self.presenter = presenter
+
+    def _createWidgets(self, parent):
+        """This should be overriden in child views"""
+        pass
+
+    def modelUpdated(self, model):
+        """This should rerender the view given the
+        current state of the model."""
+        self.updateFromModel(model)
+
+
+class HierarchicalView(BaseView):
+    def __init__(self):
+        BaseView.__init__(self)
+        self.bound = False
+
+    def modelUpdated(self, model):
+        """This should rerender the view given the
+        current state of the model."""
+        if self.bound:
+            self.updateFromModel(model)
+
+    def tryToBindChild(self, child, componentName):
+        # TODO : this probably needs to be able to filter
+        #  based on the type and instance of child. The
+        # data from this should be injected to the binding process
+        # by the presnter
+        attachmentPoint = self.getAttachmentPoint(componentName)
+        if attachmentPoint is None:
+            return False
+        child.bindToParent(attachmentPoint)
+        return True
+
+    def getAttachmentPoint(self, componentName):
+        """This should be overridedn in derived classes if they
+        are to contain children. The returned point should be
+        a widget that will contain all the widgets in the child's
+        view.
+
+        ComponentName is the naem of the type of component. This allows
+        filtering based on child types, and certain types of children to
+        be attached to certain locations.
+
+        Return
+        ------
+        This shoudl return the parent widget for the child view, if the
+        child should be attached, and None if it should not be attached."""
+
+        return None
 
     def bindToParent(self, parent):
         if parent is None:
@@ -19,34 +67,6 @@ class BaseView:
         # push a first update to the view
         self.presenter.modelUpdated()        
 
-    def _createWidgets(self, parent):
-        """This should be overriden in child views"""
-        pass
-
-    def modelUpdated(self, model):
-        """This should rerender the view given the
-        current state of the model."""
-        if self.bound:
-            self.updateFromModel(model)
-
-class HierarchicalView(BaseView):
-    def __init__(self):
-        BaseView.__init__(self)
-
-    def bindChild(self, child):
-        # TODO : this probably needs to be able to filter
-        #  based on the type and instance of child. The
-        # data from this should be injected to the binding process
-        # by the presnter
-        attachmentPoint = self.getAttachmentPoint()        
-        child.bindToParent(attachmentPoint)
-
-    def getAttachmentPoint(self):
-        """This should be overridedn in derived classes if they
-        are to contain children. The returned point should be
-        a widget that will contain all the widgets in the child's
-        view."""
-        return None
             
 
 class ApplicationView(HierarchicalView):
@@ -60,7 +80,7 @@ class ApplicationView(HierarchicalView):
             return self.root
         return Toplevel(self.root)
 
-    def getAttachmentPoint(self):
+    def getAttachmentPoint(self, componentNam):
         return self.createWindow()
 
     def show(self):

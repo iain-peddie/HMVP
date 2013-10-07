@@ -55,6 +55,14 @@ class MockComponentFactory:
         self.lastComponent = "child creator"
         return self._createComponent(parent)
 
+    def createMasterAndChildComponent(self, parent):
+        self.lastComponent = "master and child"
+        return self._createComponent(parent)
+
+    def createChildAndMasterComponent(self, parent):
+        self.lastComponent = "child and master"
+        return self._createComponent(parent)
+
     def _createComponent(self, parent):
         model = BaseModel()
         view = MockHierarchicalView()
