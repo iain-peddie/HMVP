@@ -23,6 +23,7 @@ class HierarchicalPresenter(BasePresenter):
     def addChild(self, child):
         child.bindToParent(self)
         self.children.append(child)
+        self.view.bindChild(child.view)
 
     def bindToParent(self, parent):
         self.parent = parent
@@ -102,11 +103,6 @@ class ApplicationController(HierarchicalPresenter):
     def __init__(self, model, view, factory):
         HierarchicalPresenter.__init__(self, model, view)
         self.factory = factory
-
-    def addChild(self, childPresenter):
-        viewParent = self.view.createWindow()
-        childPresenter.view.bindToParent(viewParent)
-        HierarchicalPresenter.addChild(self, childPresenter)
 
     def createMasterWindow(self):
         return self.factory.createMasterComponent(self)

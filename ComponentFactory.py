@@ -40,7 +40,7 @@ class MockComponentFactory:
     def createApplication(self):
         self.lastComponent = "application"
         model = BaseModel()
-        view = MockView()
+        view = MockHierarchicalView()
         return ApplicationController(model, view, self)
 
     def createMasterComponent(self, parent):
@@ -57,7 +57,7 @@ class MockComponentFactory:
 
     def _createComponent(self, parent):
         model = BaseModel()
-        view = MockView()
+        view = MockHierarchicalView()
         component = MockHierarchicalPresenter(model, view)
         parent.addChild(component)
         return component

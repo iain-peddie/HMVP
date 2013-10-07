@@ -23,6 +23,22 @@ class MockView(BaseView):
     def show(self):
         self.shown = True
 
+class MockHierarchicalView(MockView):
+    def __init__(self):
+        self.updated = False
+        self.widgetsCreated = False
+        self.shown = False
+        self.children = []
+        self.bound = False
+
+    def bindChild(self, child):
+        self.children.append(child)
+
+    def bindToParent(self, parent):
+        self.bound = True
+        self.parent = parent
+
+
 class MockHierarchicalPresenter(HierarchicalPresenter):
 
     def __init__(self, model, view, handledMessages = []):

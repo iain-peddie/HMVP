@@ -3,12 +3,175 @@ from WellBehavedPython.api import *
 
 from Model import *
 from Presenter import *
-from View import BaseView
+from View import *
 from Mocks import *
 from ComponentFactory import MockComponentFactory
 
 import weakref
 
+class TestingHierarchicalView(HierarchicalView):
+
+    def __init__(self, injectedAttachmentPoint):
+        HierarchicalView.__init__(self)
+        self.attachmentPoint = injectedAttachmentPoint
+
+    def getAttachmentPoint(self):
+        return self.attachmentPoint
+
+class HierarhicalPresenterTests(TestCase):
+
+    def __init__(self, name):
+        TestCase.__init__(self, name)
+
+    def test_send_unhandled_upwards_message_goes_to_self_and_parent(self):
+        # Where
+        model = BaseModel()
+        view = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(model, view)
+        presenter = MockHierarchicalPresenter(model, view)
+        parent.addChild(presenter)
+
+
+        # When
+        presenter.sendUpwardsMessage("TestMessage", ["Test data"]);
+        expect(presenter.recordedMessages).toContain("TestMessage", "Message should be sent to child")
+        expect(parent.recordedMessages).toContain("TestMessage", "Message should be sent to parent")
+
+    def test_that_handled_upwards_message_dont_go_to_parent(self):
+        # Where
+        model = BaseModel()
+        view = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(model, view)
+        presenter = MockHierarchicalPresenter(model, view, ["TestMessage"])
+        parent.addChild(presenter)
+
+
+        # When
+        presenter.sendUpwardsMessage("TestMessage", ["Test data"]);
+
+        # Then
+        expect(presenter.recordedMessages).toContain("TestMessage", "Message should be sent to child")
+        expect(parent.recordedMessages).Not.toContain("TestMessage", "Message should be sent to parent")
+
+    def test_that_upwards_messages_can_bypass_self_but_not_parent(self):
+        # Where
+        model = BaseModel()
+        view = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(model, view)
+        presenter = MockHierarchicalPresenter(model, view)
+        parent.addChild(presenter)
+
+        # When
+        presenter.sendUpwardsMessage("TestMessage", None, bypassSelf = True)
+
+        # Then
+        expect(presenter.recordedMessages).Not.toContain("TestMessage", "message should have bypassed child")
+        expect(parent.recordedMessages).toContain("TestMessage", "message should have been sent to parent")
+        
+
+    def test_that_handled_downwards_message_not_sent_to_children(self):
+        # Where
+        model = BaseModel()
+        view = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(model, view, ["TestMessage"])
+        child1 =  MockHierarchicalPresenter(model, view)
+        child2 = MockHierarchicalPresenter(model, view)
+        parent.addChild(child1)
+        parent.addChild(child2)
+
+        # When
+        parent.sendDownwardsMessage("TestMessage", ["TestData"])
+        
+        # Then
+        expect(parent.recordedMessages).toContain("TestMessage", "Message should be sent to parent")
+        expect(child1.recordedMessages).Not.toContain("TestMessage", "Message should not go to children")
+        expect(child2.recordedMessages).Not.toContain("TestMessage", "Message should not go to children")
+
+    def test_that_unhandled_downwards_message_sent_to_all_children(self):
+        # Where
+        model = BaseModel()
+        view = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(model, view)
+        child1 =  MockHierarchicalPresenter(model, view)
+        child2 = MockHierarchicalPresenter(model, view)
+        parent.addChild(child1)
+        parent.addChild(child2)
+
+        # When
+        parent.sendDownwardsMessage("TestMessage", ["TestData"])
+        
+        # Then
+        expect(parent.recordedMessages).toContain("TestMessage", "Message should be sent to parent")
+        expect(child1.recordedMessages).toContain("TestMessage", "Message should go to children")
+        expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")
+
+    def test_that_downwward_message_being_handled_does_not_block_message_to_siblings(self):
+        # Where
+        model = BaseModel()
+        view = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(model, view)
+        child1 =  MockHierarchicalPresenter(model, view, ["TestMessage"])
+        child2 = MockHierarchicalPresenter(model, view)
+        parent.addChild(child1)
+        parent.addChild(child2)
+
+        # When
+        parent.sendDownwardsMessage("TestMessage", ["TestData"])
+        
+        # Then
+        expect(parent.recordedMessages).toContain("TestMessage", "Message should be sent to parent")
+        expect(child1.recordedMessages).toContain("TestMessage", "Message should go to children")
+        expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")
+
+    def test_that_downwards_messages_can_bypass_self_but_not_children(self):
+        # Where
+        model = BaseModel()
+        view = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(model, view)
+        child1 =  MockHierarchicalPresenter(model, view)
+        child2 = MockHierarchicalPresenter(model, view)
+        parent.addChild(child1)
+        parent.addChild(child2)
+
+        # When
+        parent.sendDownwardsMessage("TestMessage", ["TestData"], bypassSelf = True)
+        
+        # Then
+        expect(parent.recordedMessages).Not.toContain("TestMessage", "Message should bypass parent")
+        expect(child1.recordedMessages).toContain("TestMessage", "Message should go to children")
+        expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")
+
+    def test_that_adding_child_binds_child_view_to_parent_view(self):
+        # Where
+        parentView = MockHierarchicalView()
+        childView = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(BaseModel(), parentView)
+        child = MockHierarchicalPresenter(BaseModel(), childView)
+
+        # When
+        contentsBefore = parentView.children[:]
+        parent.addChild(child)
+        contentsAfter = parentView.children[:]
+
+        # Then
+        expect(contentsBefore).Not.toContain(childView)
+        expect(contentsAfter).toContain(childView)        
+
+    def test_that_adding_child_to_HierarchicalView_sends_attachment_point_to_child_view(self):
+        # Where
+        mockAttachmentPoint = "ChildAttachmentPoint"
+        parentView = TestingHierarchicalView(mockAttachmentPoint)
+        childView = MockHierarchicalView()
+        parent = MockHierarchicalPresenter(BaseModel(), parentView)
+        child = MockHierarchicalPresenter(BaseModel(), childView)
+
+        # When
+        parent.addChild(child)
+
+        # Then
+        expect(childView.bound).toBeTrue("Child should have been bound to parent")
+        expect(childView.parent).toEqual(mockAttachmentPoint)
+    
 
 class MasterPresenterTests(TestCase):
     
@@ -17,7 +180,7 @@ class MasterPresenterTests(TestCase):
 
     def before(self):
         self.model = MasterModel()
-        self.view = MockView()
+        self.view = MockHierarchicalView()
         self.presenter = MasterPresenter(self.model, self.view)
         self.parent = MockHierarchicalPresenter(self.model, self.view)
         self.parent.addChild(self.presenter)
@@ -46,123 +209,6 @@ class MasterPresenterTests(TestCase):
         expect(self.parent.recordedData).toContain(sentText)
         expect(self.model.getNextText()).toEqual("3 items")
 
-    def test_send_unhandled_upwards_message_goes_to_self_and_parent(self):
-        # Where
-        model = BaseModel()
-        view = BaseView()
-        parent = MockHierarchicalPresenter(model, view)
-        presenter = MockHierarchicalPresenter(model, view)
-        parent.addChild(presenter)
-
-
-        # When
-        presenter.sendUpwardsMessage("TestMessage", ["Test data"]);
-        expect(presenter.recordedMessages).toContain("TestMessage", "Message should be sent to child")
-        expect(parent.recordedMessages).toContain("TestMessage", "Message should be sent to parent")
-
-    def test_that_handled_upwards_message_dont_go_to_parent(self):
-        # Where
-        model = BaseModel()
-        view = BaseView()
-        parent = MockHierarchicalPresenter(model, view)
-        presenter = MockHierarchicalPresenter(model, view, ["TestMessage"])
-        parent.addChild(presenter)
-
-
-        # When
-        presenter.sendUpwardsMessage("TestMessage", ["Test data"]);
-
-        # Then
-        expect(presenter.recordedMessages).toContain("TestMessage", "Message should be sent to child")
-        expect(parent.recordedMessages).Not.toContain("TestMessage", "Message should be sent to parent")
-
-    def test_that_upwards_messages_can_bypass_self_but_not_parent(self):
-        # Where
-        model = BaseModel()
-        view = BaseView()
-        parent = MockHierarchicalPresenter(model, view)
-        presenter = MockHierarchicalPresenter(model, view)
-        parent.addChild(presenter)
-
-        # When
-        presenter.sendUpwardsMessage("TestMessage", None, bypassSelf = True)
-
-        # Then
-        expect(presenter.recordedMessages).Not.toContain("TestMessage", "message should have bypassed child")
-        expect(parent.recordedMessages).toContain("TestMessage", "message should have been sent to parent")
-        
-
-    def test_that_handled_downwards_message_not_sent_to_children(self):
-        # Where
-        model = BaseModel()
-        view = BaseView()
-        parent = MockHierarchicalPresenter(model, view, ["TestMessage"])
-        child1 =  MockHierarchicalPresenter(model, view)
-        child2 = MockHierarchicalPresenter(model, view)
-        parent.addChild(child1)
-        parent.addChild(child2)
-
-        # When
-        parent.sendDownwardsMessage("TestMessage", ["TestData"])
-        
-        # Then
-        expect(parent.recordedMessages).toContain("TestMessage", "Message should be sent to parent")
-        expect(child1.recordedMessages).Not.toContain("TestMessage", "Message should not go to children")
-        expect(child2.recordedMessages).Not.toContain("TestMessage", "Message should not go to children")
-
-    def test_that_unhandled_downwards_message_sent_to_all_children(self):
-        # Where
-        model = BaseModel()
-        view = BaseView()
-        parent = MockHierarchicalPresenter(model, view)
-        child1 =  MockHierarchicalPresenter(model, view)
-        child2 = MockHierarchicalPresenter(model, view)
-        parent.addChild(child1)
-        parent.addChild(child2)
-
-        # When
-        parent.sendDownwardsMessage("TestMessage", ["TestData"])
-        
-        # Then
-        expect(parent.recordedMessages).toContain("TestMessage", "Message should be sent to parent")
-        expect(child1.recordedMessages).toContain("TestMessage", "Message should go to children")
-        expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")
-
-    def test_that_downwward_message_being_handled_does_not_block_message_to_siblings(self):
-        # Where
-        model = BaseModel()
-        view = BaseView()
-        parent = MockHierarchicalPresenter(model, view)
-        child1 =  MockHierarchicalPresenter(model, view, ["TestMessage"])
-        child2 = MockHierarchicalPresenter(model, view)
-        parent.addChild(child1)
-        parent.addChild(child2)
-
-        # When
-        parent.sendDownwardsMessage("TestMessage", ["TestData"])
-        
-        # Then
-        expect(parent.recordedMessages).toContain("TestMessage", "Message should be sent to parent")
-        expect(child1.recordedMessages).toContain("TestMessage", "Message should go to children")
-        expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")
-
-    def test_that_downwards_messages_can_bypass_self_but_not_children(self):
-        # Where
-        model = BaseModel()
-        view = BaseView()
-        parent = MockHierarchicalPresenter(model, view)
-        child1 =  MockHierarchicalPresenter(model, view)
-        child2 = MockHierarchicalPresenter(model, view)
-        parent.addChild(child1)
-        parent.addChild(child2)
-
-        # When
-        parent.sendDownwardsMessage("TestMessage", ["TestData"], bypassSelf = True)
-        
-        # Then
-        expect(parent.recordedMessages).Not.toContain("TestMessage", "Message should bypass parent")
-        expect(child1.recordedMessages).toContain("TestMessage", "Message should go to children")
-        expect(child2.recordedMessages).toContain("TestMessage", "Message should go to children")
 
 class SlavePresenterTests(TestCase):
 
@@ -187,7 +233,7 @@ class ChildCreatorPresenterTests(TestCase):
 
     def before(self):
         self.presenter = ChildCreatorPresenter(BaseModel(), MockView())
-        self.parent = MockHierarchicalPresenter(BaseModel(), MockView())
+        self.parent = MockHierarchicalPresenter(BaseModel(), MockHierarchicalView())
         self.parent.addChild(self.presenter)
 
     def test_that_presenter_createMasterWindow_sends_message_to_parent(self):
@@ -215,8 +261,8 @@ class MasterAndSlavePresenterTests(TestCase):
         TestCase.__init__(self, name)
 
     def before(self):
-        self.parent = MockHierarchicalPresenter(BaseModel(), MockView())
-        self.presenter = MasterAndSlavePresenter(BaseModel(), MockView())
+        self.parent = MockHierarchicalPresenter(BaseModel(), MockHierarchicalView())
+        self.presenter = MasterAndSlavePresenter(BaseModel(), MockHierarchicalView())
         self.child1 = MockHierarchicalPresenter(BaseModel(), MockView())
         self.child2 = MockHierarchicalPresenter(BaseModel(), MockView())
 

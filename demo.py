@@ -30,6 +30,7 @@ def main():
 def unitTest():
     suite = TestSuite()
     suite.add(MasterModelTests.suite())
+    suite.add(HierarhicalPresenterTests.suite())
     suite.add(MasterPresenterTests.suite())
     suite.add(SlavePresenterTests.suite())
     suite.add(ChildCreatorPresenterTests.suite())

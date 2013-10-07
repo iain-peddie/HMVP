@@ -12,6 +12,8 @@ class BaseView:
         self.presenter = presenter
 
     def bindToParent(self, parent):
+        if parent is None:
+            return
         self._createWidgets(parent)
         self.bound = True
         # push a first update to the view
@@ -30,6 +32,21 @@ class BaseView:
 class HierarchicalView(BaseView):
     def __init__(self):
         BaseView.__init__(self)
+
+    def bindChild(self, child):
+        # TODO : this probably needs to be able to filter
+        #  based on the type and instance of child. The
+        # data from this should be injected to the binding process
+        # by the presnter
+        attachmentPoint = self.getAttachmentPoint()        
+        child.bindToParent(attachmentPoint)
+
+    def getAttachmentPoint(self):
+        """This should be overridedn in derived classes if they
+        are to contain children. The returned point should be
+        a widget that will contain all the widgets in the child's
+        view."""
+        return None
             
 
 class ApplicationView(HierarchicalView):
@@ -42,6 +59,9 @@ class ApplicationView(HierarchicalView):
             self._createRoot()
             return self.root
         return Toplevel(self.root)
+
+    def getAttachmentPoint(self):
+        return self.createWindow()
 
     def show(self):
         self.root.mainloop()
