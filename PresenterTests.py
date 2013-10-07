@@ -270,6 +270,28 @@ class ChildCreatorPresenterTests(TestCase):
         # Then
         expect(self.parent.recordedMessages).toContain("CreateSlaveWindow")
 
+    def test_that_presenter_createMasterAndSlaveWindow_sends_message_to_parent(self):
+        # Where
+        presenter = self.presenter
+
+        # When
+        presenter.createMasterAndSlaveWindow()
+
+        # Then
+        expect(self.parent.recordedMessages).toContain("CreateMasterAndSlaveWindow")
+
+
+    def test_that_presenter_createSlaveAndMasterWindow_sends_message_to_parent(self):
+        # Where
+        presenter = self.presenter
+
+        # When
+        presenter.createSlaveAndMasterWindow()
+
+        # Then
+        expect(self.parent.recordedMessages).toContain("CreateSlaveAndMasterWindow")
+
+
 class MasterAndSlavePresenterTests(TestCase):
     def __init__(self, name):
         TestCase.__init__(self, name)
@@ -384,10 +406,10 @@ class ApplicationControllerTests(TestCase):
         controller = self.controller
 
         # When
-        controller.tryToHandleMessage("CreateMasterAndChildWindow", None)
+        controller.tryToHandleMessage("CreateMasterAndSlaveWindow", None)
 
         # Then
-        expect(self.factory.lastComponent).toEqual("master and child")
+        expect(self.factory.lastComponent).toEqual("master and slave")
         expect(len(self.controller.children)).toEqual(1)
 
     def test_that_application_can_create_child_and_master_component(self):
@@ -395,10 +417,10 @@ class ApplicationControllerTests(TestCase):
         controller = self.controller
 
         # When
-        controller.tryToHandleMessage("CreateChildAndMasterWindow", None)
+        controller.tryToHandleMessage("CreateSlaveAndMasterWindow", None)
 
         # Then
-        expect(self.factory.lastComponent).toEqual("child and master")
+        expect(self.factory.lastComponent).toEqual("slave and master")
         expect(len(self.controller.children)).toEqual(1)
 
 

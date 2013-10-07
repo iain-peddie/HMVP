@@ -158,11 +158,20 @@ class ChildCreatorView(HierarchicalView):
     def _createWidgets(self, parent):
         self.createMasterButton = Button(parent, text = "Create Master", 
                                          command = self.createMasterButton_clicked)
-        self.createMasterButton.grid(row = 0, column = 0)
 
         self.createSlaveButton = Button(parent, text = "Create Slave",
                                         command = self.createSlaveButton_clicked)
+
+        self.createMasterAndSlaveButton = Button(parent, text = "Create Master and Slave",
+                                                 command = self.createMasterAndSlaveButton_clicked)
+        
+        self.createSlaveAndMasterButton = Button(parent, text = "Create Slave and Master",
+                                                 command = self.createSlaveAndMasterButton_clicked)
+
+        self.createMasterButton.grid(row = 0, column = 0)
         self.createSlaveButton.grid(row = 0, column = 1)
+        self.createMasterAndSlaveButton.grid(row = 1, column = 0)
+        self.createSlaveAndMasterButton.grid(row = 1, column = 1)
 
     def createMasterButton_clicked(self):
         self.presenter.createMasterWindow()
@@ -170,14 +179,35 @@ class ChildCreatorView(HierarchicalView):
     def createSlaveButton_clicked(self):
         self.presenter.createSlaveWindow()
 
+    def createMasterAndSlaveButton_clicked(self):
+        self.presenter.createMasterAndSlaveWindow()
+
+    def createSlaveAndMasterButton_clicked(self):
+        self.presenter.createSlaveAndMasterWindow()
+
 class MasterAndSlaveView(HierarchicalView):
     def __init__(self):
         HierarchicalView.__init__(self)
+        self.childrenAdded = 0
+        self.panels = []
 
     def updateFromModel(self, model):
         pass
     
     def _createWidgets(self, parent):
-        pass
+        for i in range(0,2):
+            frame = Frame(parent)
+            frame.grid(row = 0, column = i)
+            self.panels.append(frame)
+
+    def getAttachmentPoint(self, name):
+        attachmentPoint = None
+        if self.childrenAdded < len(self.panels):
+            attachmentPoint = self.panels[self.childrenAdded]
+            self.childrenAdded += 1
+            
+        return attachmentPoint
+
+            
 
 

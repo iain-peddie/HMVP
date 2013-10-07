@@ -25,6 +25,23 @@ class ComponentFactory:
         parent.addChild(presenter)
         return presenter
 
+    def createSlaveAndMasterComponent(self, parent):
+        component = self.createChildlessSlaveMasterComponent(parent)
+        self.createSlaveComponent(component)
+        self.createMasterComponent(component)
+
+    def createMasterAndSlaveComponent(self, parent):
+        component = self.createChildlessSlaveMasterComponent(parent)
+        self.createMasterComponent(component)
+        self.createSlaveComponent(component)
+
+    def createChildlessSlaveMasterComponent(self, parent):
+        view = MasterAndSlaveView()
+        presenter = MasterAndSlavePresenter(BaseModel(), view)
+        parent.addChild(presenter)
+        return presenter
+
+
     def createChildCreatorComponent(self, parent):
         view = ChildCreatorView()
         presenter = ChildCreatorPresenter(BaseModel(), view)
@@ -55,12 +72,12 @@ class MockComponentFactory:
         self.lastComponent = "child creator"
         return self._createComponent(parent)
 
-    def createMasterAndChildComponent(self, parent):
-        self.lastComponent = "master and child"
+    def createMasterAndSlaveComponent(self, parent):
+        self.lastComponent = "master and slave"
         return self._createComponent(parent)
 
-    def createChildAndMasterComponent(self, parent):
-        self.lastComponent = "child and master"
+    def createSlaveAndMasterComponent(self, parent):
+        self.lastComponent = "slave and master"
         return self._createComponent(parent)
 
     def _createComponent(self, parent):

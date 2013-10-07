@@ -87,6 +87,12 @@ class ChildCreatorPresenter(HierarchicalPresenter):
     def createSlaveWindow(self):
         self.sendUpwardsMessage("CreateSlaveWindow", None)
 
+    def createMasterAndSlaveWindow(self):
+        self.sendUpwardsMessage("CreateMasterAndSlaveWindow", None)
+
+    def createSlaveAndMasterWindow(self):
+        self.sendUpwardsMessage("CreateSlaveAndMasterWindow", None)
+
 class MasterAndSlavePresenter(HierarchicalPresenter):
     
     def __init__(self, model, view):
@@ -111,11 +117,11 @@ class ApplicationController(HierarchicalPresenter):
     def createSlaveWindow(self):
         return self.factory.createSlaveComponent(self)
 
-    def createMasterAndChildWindow(self):
-        return self.factory.createMasterAndChildComponent(self)
+    def createMasterAndSlaveWindow(self):
+        return self.factory.createMasterAndSlaveComponent(self)
 
-    def createChildAndMasterWindow(self):
-        return self.factory.createChildAndMasterComponent(self)
+    def createSlaveAndMasterWindow(self):
+        return self.factory.createSlaveAndMasterComponent(self)
 
     def createChildCreatorWindow(self):
         return self.factory.createChildCreatorComponent(self)
@@ -129,10 +135,10 @@ class ApplicationController(HierarchicalPresenter):
             self.createSlaveWindow()
         elif message == "CreateMasterWindow":
             self.createMasterWindow()
-        elif message == "CreateMasterAndChildWindow":
-            self.createMasterAndChildWindow()
-        elif message == "CreateChildAndMasterWindow":
-            self.createChildAndMasterWindow()
+        elif message == "CreateMasterAndSlaveWindow":
+            self.createMasterAndSlaveWindow()
+        elif message == "CreateSlaveAndMasterWindow":
+            self.createSlaveAndMasterWindow()
         else:
             handled = HierarchicalPresenter.tryToHandleMessage(self, message, data)
 
