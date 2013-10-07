@@ -33,3 +33,12 @@ This shows how to make two views collaborate by both viewing different parts of 
 
 This shows how to make two views collaborate via an application controller which is responsible for creating the various
 views.
+
+6-hierarchical-presenters
+-------------------------
+This shows how to make multiple presenters collaborate via a message passing/broadcasting system
+
+7-hierarchical-components
+-------------------------
+This shows the final step, where components' views get bound to their parents when their presenters are conencted in
+a tree hierarchy. This allows components to be written with no knowledge of what their parents will be, yet still work fine
