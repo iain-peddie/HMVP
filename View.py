@@ -130,4 +130,14 @@ class ChildCreatorView(HierarchicalView):
     def createSlaveButton_clicked(self):
         self.presenter.createSlaveWindow()
 
+class MasterAndSlaveView(HierarchicalView):
+    def __init__(self):
+        HierarchicalView.__init__(self)
+
+    def updateFromModel(self, model):
+        pass
+    
+    def _createWidgets(self, parent):
+        pass
+
 

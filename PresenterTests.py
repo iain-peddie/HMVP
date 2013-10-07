@@ -209,6 +209,35 @@ class ChildCreatorPresenterTests(TestCase):
 
         # Then
         expect(self.parent.recordedMessages).toContain("CreateSlaveWindow")
+
+class MasterAndSlavePresenterTests(TestCase):
+    def __init__(self, name):
+        TestCase.__init__(self, name)
+
+    def before(self):
+        self.parent = MockHierarchicalPresenter(BaseModel(), MockView())
+        self.presenter = MasterAndSlavePresenter(BaseModel(), MockView())
+        self.child1 = MockHierarchicalPresenter(BaseModel(), MockView())
+        self.child2 = MockHierarchicalPresenter(BaseModel(), MockView())
+
+        self.parent.addChild(self.presenter)
+        self.presenter.addChild(self.child1)
+        self.presenter.addChild(self.child2)
+
+    def test_that_presenter_bounces_TextUpdated_message_back_to_children(self):
+        # Where
+        sourceChild = self.child1
+        targetChild = self.child2
+        presenter = self.presenter
+        parent = self.parent
+
+        # When
+        sourceChild.sendUpwardsMessage("TextUpdated", "boo", bypassSelf = True)
+
+        # Then
+        expect(parent.recordedMessages).Not.toContain("TextUpdated")
+        expect(sourceChild.recordedMessages).toContain("TextUpdated")
+        expect(targetChild.recordedMessages).toContain("TextUpdated")
         
 
 class ApplicationControllerTests(TestCase):

@@ -84,6 +84,17 @@ class ChildCreatorPresenter(HierarchicalPresenter):
 
     def createSlaveWindow(self):
         self.sendUpwardsMessage("CreateSlaveWindow", None)
+
+class MasterAndSlavePresenter(HierarchicalPresenter):
+    
+    def __init__(self, model, view):
+        HierarchicalPresenter.__init__(self, model, view)
+
+    def tryToHandleMessage(self, message, data):
+        if message == "TextUpdated":
+            self.sendDownwardsMessage(message, data, True)
+            return True
+        return HierarchicalPresenter.tryToHandleMessage(message, data)
     
     
 class ApplicationController(HierarchicalPresenter):

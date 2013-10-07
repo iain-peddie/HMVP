@@ -33,6 +33,7 @@ def unitTest():
     suite.add(MasterPresenterTests.suite())
     suite.add(SlavePresenterTests.suite())
     suite.add(ChildCreatorPresenterTests.suite())
+    suite.add(MasterAndSlavePresenterTests.suite())
     suite.add(ApplicationControllerTests.suite())
     runner = VerboseConsoleTestRunner()
     results = runner.run(suite)
