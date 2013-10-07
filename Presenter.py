@@ -53,10 +53,6 @@ class MasterPresenter(HierarchicalPresenter):
         self.sendUpwardsMessage("TextUpdated", updateText)
         self.model.resetNextText()
 
-    def requestCreateListener(self):
-        self.sendUpwardsMessage("CreateSlaveWindow", None)
-
-
 class SlavePresenter(HierarchicalPresenter):
     
     def __init__(self, model, view):
@@ -77,6 +73,18 @@ class SlavePresenter(HierarchicalPresenter):
             return HierarchicalPresenter.tryToHandleMessage(self, message, data)
         
         return handled
+
+class ChildCreatorPresenter(HierarchicalPresenter):
+
+    def __init__(self, model, view):
+        HierarchicalPresenter.__init__(self, model, view)
+
+    def createMasterWindow(self):
+        self.sendUpwardsMessage("CreateMasterWindow", None)
+
+    def createSlaveWindow(self):
+        self.sendUpwardsMessage("CreateSlaveWindow", None)
+    
     
 class ApplicationController(HierarchicalPresenter):
 
@@ -95,13 +103,18 @@ class ApplicationController(HierarchicalPresenter):
     def createSlaveWindow(self):
         return self.factory.createSlaveComponent(self)
 
+    def createChildCreatorWindow(self):
+        return self.factory.createChildCreatorComponent(self)
+
     def show(self):
         self.view.show()
 
     def tryToHandleMessage(self, message, data):
         handled = True
         if message == "CreateSlaveWindow":
-            window = self.createSlaveWindow()
+            self.createSlaveWindow()
+        elif message == "CreateMasterWindow":
+            self.createMasterWindow()
         else:
             handled = HierarchicalPresenter.tryToHandleMessage(self, message, data)
 

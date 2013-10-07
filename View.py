@@ -15,8 +15,7 @@ class BaseView:
         self._createWidgets(parent)
         self.bound = True
         # push a first update to the view
-        self.presenter.modelUpdated()
-        
+        self.presenter.modelUpdated()        
 
     def _createWidgets(self, parent):
         """This should be overriden in child views"""
@@ -27,11 +26,15 @@ class BaseView:
         current state of the model."""
         if self.bound:
             self.updateFromModel(model)
-            
 
-class ApplicationView(BaseView):
+class HierarchicalView(BaseView):
     def __init__(self):
         BaseView.__init__(self)
+            
+
+class ApplicationView(HierarchicalView):
+    def __init__(self):
+        HierarchicalView.__init__(self)
         self.root = []
 
     def createWindow(self):
@@ -48,10 +51,10 @@ class ApplicationView(BaseView):
         self.root.geometry("400x300+300+300")
 
 
-class MasterView(BaseView):
+class MasterView(HierarchicalView):
 
     def __init__(self):
-        BaseView.__init__(self)
+        HierarchicalView.__init__(self)
 
     def _createWidgets(self, parent):
         self.top = parent
@@ -63,10 +66,6 @@ class MasterView(BaseView):
         self.updateButton = Button(self.top, text="Update",
                                    command = self.updateButton_clicked)
         self.updateButton.grid(row = 0, column = 0)
-
-        self.createListenerButton = Button(self.top, text="Create Listener", 
-                                        command = self.createListenerButton_clicked)
-        self.createListenerButton.grid(row = 1, column = 0)
 
         self.updateText = Entry(self.top, text="")
         self.updateText.grid(row = 0, column = 1)
@@ -83,12 +82,9 @@ class MasterView(BaseView):
         currentUpdate = self.updateText.get()
         self.presenter.updateText(currentUpdate)
 
-    def createListenerButton_clicked(self):
-        self.presenter.requestCreateListener()
-
-class SlaveView(BaseView):
+class SlaveView(HierarchicalView):
     def __init__(self):
-        BaseView.__init__(self)
+        HierarchicalView.__init__(self)
 
     def _createWidgets(self, parent):
         self.top = parent
@@ -111,3 +107,27 @@ class SlaveView(BaseView):
     def updateButton_clicked(self):    
         self.presenter.updateText()
     
+class ChildCreatorView(HierarchicalView):
+
+    def __init__(self):
+        HierarchicalView.__init__(self)
+
+    def updateFromModel(self, model):
+        pass
+    
+    def _createWidgets(self, parent):
+        self.createMasterButton = Button(parent, text = "Create Master", 
+                                         command = self.createMasterButton_clicked)
+        self.createMasterButton.grid(row = 0, column = 0)
+
+        self.createSlaveButton = Button(parent, text = "Create Slave",
+                                        command = self.createSlaveButton_clicked)
+        self.createSlaveButton.grid(row = 0, column = 1)
+
+    def createMasterButton_clicked(self):
+        self.presenter.createMasterWindow()
+
+    def createSlaveButton_clicked(self):
+        self.presenter.createSlaveWindow()
+
+

@@ -33,16 +33,6 @@ class MasterPresenterTests(TestCase):
         # Then
         expect(self.view.updated).toBeTrue()
 
-    def test_presenter_delegates_cascades_request_to_parent(self):
-        # Where
-        presenter = self.presenter
-
-        # When
-        presenter.requestCreateListener()
-
-        # Then
-        expect(self.parent.recordedMessages).toContain("CreateSlaveWindow")
-
     def test_presenter_updateText_sends_TextUpdated_message(self):
         # Where
         presenter = self.presenter
@@ -191,6 +181,36 @@ class SlavePresenterTests(TestCase):
         # Then
         expect(model.getCurrentText()).toContain("UpdatedText")
 
+class ChildCreatorPresenterTests(TestCase):
+    def __init__(self, name):
+        TestCase.__init__(self, name)
+
+    def before(self):
+        self.presenter = ChildCreatorPresenter(BaseModel(), MockView())
+        self.parent = MockHierarchicalPresenter(BaseModel(), MockView())
+        self.parent.addChild(self.presenter)
+
+    def test_that_presenter_createMasterWindow_sends_message_to_parent(self):
+        # Where
+        presenter = self.presenter
+
+        # When
+        presenter.createMasterWindow()
+
+        # Then
+        expect(self.parent.recordedMessages).toContain("CreateMasterWindow")
+
+    def test_that_presenter_createSlaveWindow_sends_message_to_parent(self):
+        # Where
+        presenter = self.presenter
+
+        # When
+        presenter.createSlaveWindow()
+
+        # Then
+        expect(self.parent.recordedMessages).toContain("CreateSlaveWindow")
+        
+
 class ApplicationControllerTests(TestCase):
     def __init__(self, name):
         TestCase.__init__(self, name)
@@ -246,6 +266,28 @@ class ApplicationControllerTests(TestCase):
         # Then
         expect(self.factory.lastComponent).toEqual("slave")
         expect(len(self.controller.children)).toEqual(1)
+
+    def test_that_controller_can_create_master_component(self):
+        # Where
+        controller = self.controller
+
+        # When
+        controller.tryToHandleMessage("CreateMasterWindow", None)
+
+        # Then
+        expect(self.factory.lastComponent).toEqual("master")
+        expect(len(self.controller.children)).toEqual(1)        
+
+    def test_that_Controlelr_can_create_child_creator_component(self):
+        # Where
+        controller = self.controller
+
+        # When
+        controller.createChildCreatorWindow()
+
+        # Then
+        expect(self.factory.lastComponent).toEqual("child creator")
+        expect(len(self.controller.children)).toEqual(1)        
 
     def test_that_unexpected_messages_are_sent_downwards(self):
         # Where

@@ -13,16 +13,22 @@ class ComponentFactory:
         view = ApplicationView()
         return ApplicationController(model, view, self)
 
-    def createMasterComponent(self, application):    
+    def createMasterComponent(self, parent):    
         view = MasterView()
         presenter = MasterPresenter(MasterModel(), view)
-        application.addChild(presenter)
+        parent.addChild(presenter)
         return presenter
 
-    def createSlaveComponent(self, application):    
+    def createSlaveComponent(self, parent):    
         view = SlaveView()
         presenter = SlavePresenter(SlaveModel(), view)
-        application.addChild(presenter)
+        parent.addChild(presenter)
+        return presenter
+
+    def createChildCreatorComponent(self, parent):
+        view = ChildCreatorView()
+        presenter = ChildCreatorPresenter(BaseModel(), view)
+        parent.addChild(presenter)
         return presenter
 
 
@@ -43,6 +49,10 @@ class MockComponentFactory:
 
     def createSlaveComponent(self, parent):
         self.lastComponent = "slave"
+        return self._createComponent(parent)
+
+    def createChildCreatorComponent(self, parent):
+        self.lastComponent = "child creator"
         return self._createComponent(parent)
 
     def _createComponent(self, parent):

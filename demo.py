@@ -22,8 +22,8 @@ import sys
 def main():
     factory = ComponentFactory()
     application = factory.createApplication()
-    application.createMasterWindow()
-    application.createSlaveWindow()
+
+    application.createChildCreatorWindow()
 
     application.show()
 
@@ -32,6 +32,7 @@ def unitTest():
     suite.add(MasterModelTests.suite())
     suite.add(MasterPresenterTests.suite())
     suite.add(SlavePresenterTests.suite())
+    suite.add(ChildCreatorPresenterTests.suite())
     suite.add(ApplicationControllerTests.suite())
     runner = VerboseConsoleTestRunner()
     results = runner.run(suite)
